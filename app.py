@@ -23,7 +23,19 @@ class Todo(db.Model):
 
 @app.route('/addTask', methods=['POST'])
 def index():
-    task_content = request.form['content']
+
+    if request.content_type == 'application/json':
+        data = request.get_json()
+    else:
+        data = request.form
+
+    if not data or 'content' not in data:
+        return jsonify({
+            'status': 'error',
+            'message': 'Invalid input'
+        }), 400
+    
+    task_content = data['content']
     new_task = Todo(content = task_content)
 
     try:
@@ -60,7 +72,18 @@ def getAllTasks():
 @app.route('/updateTask/<int:id>', methods=['PUT'])
 def update_task(id):
     task = Todo.query.get_or_404(id)
-    task_content = request.form['content']
+    if request.content_type == 'application/json':
+        data = request.get_json()
+    else:
+        data = request.form
+
+    if not data or 'content' not in data:
+        return jsonify({
+            'status': 'error',
+            'message': 'Invalid input'
+        }), 400
+        
+    task_content = data['content']
 
     try:
         task.content = task_content
